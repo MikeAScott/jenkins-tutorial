@@ -14,7 +14,7 @@ For these labs we will install Jenkins in Docker in Virtual box using Vagrant
 ## Install Docker
 * Install Virtualbox 
 * Install Vagrant
-* Have a look at the Vagrant file
+* Have a look at the [Vagrantfile](Vagrantfile)
     * The provisioner sets up docker and docker compose in Ubuntu
 * Run vagrant
 ```
@@ -28,7 +28,7 @@ docker version
 You should see the docker version page :)
 
 ## Setup Jenkins docker containers
-* Have a look at the docker-compose.yml file
+* Have a look at the [docker-compose.yml](docker-compose.yml) file
   * This creates two services:
     * jenkins-docker: Runs the docker in docker service to allow running docker containers from Jenkimns
     * jenkins-blueocean: Runs the Jenkins server    
