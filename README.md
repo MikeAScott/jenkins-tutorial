@@ -29,16 +29,18 @@ You should see the docker version page :)
 
 ## Setup Jenkins docker containers
 * Have a look at the [docker-compose.yml](docker-compose.yml) file
-  * This creates two services:
-    * jenkins-docker: Runs the docker in docker service to allow running docker containers from Jenkimns
-    * jenkins-blueocean: Runs the Jenkins server    
+  * This creates a jenkins image with docker cli, 
+  * It will run the service with a binding to the docker socket:
+    * This enables jenkins to create docker containers
+  * In order to do this the docker group on the host and in the jenkins container have to have the same group id.
+    * This is set in the Vagrantfile with the `DOCKER_GID` variable
 * Run docker compose to start the services
 ``` bash
 docker-compose up -d
 ```
 
 ## Setup jenkins
-* Open a browser on the Jenkins site https://localhost:8081
+* Open a browser on the Jenkins site https://localhost:8088
 * Check the docker logs from the jenkins-blueocean service for the initial admin password
 ``` bash
 docker logs jenkins-blueocean
