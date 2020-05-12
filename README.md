@@ -40,7 +40,7 @@ You should see the docker version page :)
 docker-compose up -d
 docker ps
 ```
-You should see a running jenkins container
+You should see a running `jenkins` container
 
 N.B. This may have already been started by the vagrant provisioning script
 
@@ -55,7 +55,97 @@ docker logs jenkins
 * Use this password to unlock jenkins
 * Install the suggested plugins
 * Create a first admin user
+  * You should be taken to the **Jenkins Dashboard**
 * Start using Jenkins
+  * Explore the dashboard and menus
+
+When you are done you can halt your jenkins VM with `vagrant halt`.  You can restart it with `vagrant up`.
+
+---
+# [LAB-02](../../tree/LAB-02) - Set up a jenkins job
+In this lab you will create a job that builds a maven project on demand
+## Copy project source
+You will use the spring boot todo list app that we have used in other tutorials.
+1.  Fork or copy the [spring-todo-list](https://github.com/MikeAScott/spring-todo-list) project to your own GitHub / GitLab / BitBucket account
+    * For now this can be a public repo so you don't have to worry about setting up credentials
+## Create Jenkins Job
+You are going to configure a job that will
+* Start a docker container that is preconfigured for building maven projects with JDK 11
+* Clone the repository that you created above
+* Build and package the code using Maven
+* Store and format the test results
+* Archive the `.war` package file
+
+Don't worry if that sounds like a lot to do, Jenkins handles most of it for us using the pipeline script'
+
+1. Open up your Jenkins console  https://localhost:8088
+1. Click on new item:
+   * Enter `todo-list-ci` as the item name
+   * Select **`Pipeline`** as the job type
+   * Click **`OK`**
+
+1. On the `Configure` page
+   * Click on the `Pipeline` tab
+   * Leave the definition as `Pipeline script`
+   * In the script section enter the following;
+    ``` bash
+    pipeline {
+      agent {
+            docker { image 'maven:3-openjdk-11' }
+        }
+
+      stages {
+          stage('Build') {
+            steps {
+                // get project code from git
+                git 'https://github.com/<your github account>/spring-todo-list'
+
+                // Run Maven
+                sh "mvn clean package"
+            }
+
+            post {
+                always {
+                  // format the test results
+                  junit '**/target/surefire-reports/TEST-*.xml'
+                }
+                success {
+                  // archive the package
+                  archiveArtifacts 'target/*.war'
+                }
+            }
+          }
+      }
+    }
+    ```
+1.  Click **`Save`**
+    * You should be returned to a page titled `Pipeline todo-list-ci`
+1.  Click on `Build Now` in the left hand menu
+    * You should see `#1 <date time>` in the `Build History` box and a progress bar
+1.  Click on the progress bar to see the build happening
+1.  Take a minute to read through the log.  You should see it:
+    * Check and Pull the maven docker image
+    * Clone the repo
+    * Run `mvn clean package`
+      * Compile the code
+      * Run the tests (including starting up a spring context)
+      * Package the `.war`
+    * Record the test results
+    * Archive the artifacts (`.war`)
+    * Stop and remove the docker container  
+
+1.  Once it is finished scroll back up to the top of the page and click on `Back to project` to return to the project page
+1. Take some time to explore e.g:
+   * Try builidng again
+   * Cick on the links
+   * Look at the test results
+   * Download the `.war` and try to run it `java -jar todo-0.0.1-SNAPSHOT.war`
+
+Congratulations you now have your very own Jenkins build server.
+
+When you are done you can halt your jenkins VM with `vagrant halt`.  You can restart it with `vagrant up`.
+
+**N.B.** If you destroy your VM you will lose all your config.  However as you have seen it is pretty easy to recreate :) 
 
 
 ---
